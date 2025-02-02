@@ -1,0 +1,42 @@
+{
+    "path_file": "./data/square",
+    "integrate_precision": 600,
+    "circles_color": [
+        255,
+        255,
+        255
+    ],
+    "track_color": [
+        0,
+        255,
+        255
+    ],
+    "background_color": [
+        0,
+        0,
+        0
+    ],
+    "origin_color": [
+        255,
+        0,
+        0
+    ],
+    "x_axis_color": [
+        0,
+        255,
+        0
+    ],
+    "y_axis_color": [
+        0,
+        0,
+        255
+    ],
+    "window_size": [
+        1200,
+        700
+    ],
+    "graph_scale": 250.0,
+    "order": 100,
+    "delta_t": 0.001,
+    "fps": 60
+}
