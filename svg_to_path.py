@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument('--file-name', type=str)
     parser.add_argument('--path-index', type=int, default=None)
     filename = parser.parse_args().file_name
-    index = parser.parse_args().index_of_path
+    index = parser.parse_args().path_index
     if index is None:
         directory = filename.replace(".svg", "")
         os.mkdir(directory)
