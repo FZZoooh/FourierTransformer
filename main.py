@@ -3,6 +3,7 @@ import pygame
 import transformer
 from path_to_function import *
 from constants import Constants
+from time import time
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--path-file', type=str, help='Path to the function file')
@@ -52,9 +53,11 @@ def targetFunction(t: float) -> complex:
 
 def main():
     print("computing parameters ...")
+    time_start = time()
     parameters = transformer.transform(targetFunction, Constants.ORDER,
                                        Constants.INTEGRATE_PRECISION)
-    print("parameters got")
+    time_cost = time() - time_start
+    print("parameters got, time cost: {:.2f}s".format(time_cost))
     print("starting gui ...")
 
     pygame.init()

@@ -1,3 +1,4 @@
+import numpy as np
 """
 PathFile Formatt: space separated number pairs, one per line
 like this:
@@ -24,8 +25,7 @@ def readPathFromFile(fileName: str) -> list:
         return path
 
 
-def functionFromPath(path: list, t: float) -> complex:
-    """Returns the function represented by the path"""
+def functionFromPath_old(path: list, t: float) -> complex:
     if len(path) == 0:
         return 0
     elif len(path) == 1:
@@ -40,3 +40,19 @@ def functionFromPath(path: list, t: float) -> complex:
         i = int(t * (n - 1))
         t = t * (n - 1) - i
         return path[i] * (1 - t) + path[i + 1] * t
+
+
+def functionFromPath(path: list, t: np.ndarray) -> np.ndarray:
+    if len(path) == 0:
+        return np.zeros_like(t, dtype=np.complex128)
+    t = np.clip(t, 0.0, 1.0)
+    n_segments = len(path) - 1
+    if n_segments == 0:
+        return np.full_like(t, path[0], dtype=np.complex128)
+    indices = np.floor(t * n_segments).astype(int)
+    indices = np.clip(indices, 0, n_segments - 1)
+    t_segment = t * n_segments - indices
+    t_segment = np.clip(t_segment, 0.0, 1.0)
+    p0 = np.array([c for c in path], dtype=np.complex128)[indices]
+    p1 = np.array([c for c in path], dtype=np.complex128)[indices + 1]
+    return p0 * (1 - t_segment) + p1 * t_segment
