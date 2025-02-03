@@ -1,24 +1,26 @@
 import argparse
 import pygame
 import transformer
+import os
 from path_to_function import *
-from constants import Constants
+from config import Config
 from time import time
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--path-file', type=str, help='Path to the function file')
+parser = argparse.ArgumentParser()
+parser.add_argument('--path-file', type=str)
+parser.add_argument('--graph-scale', type=int)
 args = parser.parse_args()
 
-path_file = Constants.PATH_FILE
-
 if args.path_file:
-    path_file = args.path_file
+    Config.PATH = args.path_file
+if args.graph_scale:
+    Config.GRAPH_SCALE = args.graph_scale
 
 
 def drawComplexPoint(num: complex, surf: pygame.surface.Surface) -> None:
     coord = (
-        int(num.real * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[0]),
-        int(-num.imag * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[1]),
+        int(num.real * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[0]),
+        int(num.imag * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[1]),
     )
     pygame.draw.circle(surf, (255, 255, 255), coord, 1)
 
@@ -26,51 +28,69 @@ def drawComplexPoint(num: complex, surf: pygame.surface.Surface) -> None:
 def drawComplexLine(num1: complex, num2: complex,
                     surf: pygame.surface.Surface) -> None:
     coord1 = (
-        int(num1.real * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[0]),
-        int(-num1.imag * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[1]),
+        int(num1.real * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[0]),
+        int(num1.imag * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[1]),
     )
     coord2 = (
-        int(num2.real * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[0]),
-        int(-num2.imag * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[1]),
+        int(num2.real * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[0]),
+        int(num2.imag * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[1]),
     )
-    pygame.draw.aaline(surf, Constants.TRACK_COLOR, coord1, coord2)
+    pygame.draw.aaline(surf, Config.TRACK_COLOR, coord1, coord2)
 
 
 def drawComplexCircle(circles, surf) -> None:
     for circle in circles:
-        x = circle[
-            "pos"].real * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[0]
-        y = -circle[
-            "pos"].imag * Constants.GRAPH_SCALE + Constants.ORIGIN_POSITION[1]
-        radius = circle["radius"] * Constants.GRAPH_SCALE
-        pygame.draw.circle(surf, Constants.CIRCLES_COLOR, (int(x), int(y)),
+        x = circle["pos"].real * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[0]
+        y = circle["pos"].imag * Config.GRAPH_SCALE + Config.ORIGIN_POSITION[1]
+        radius = circle["radius"] * Config.GRAPH_SCALE
+        pygame.draw.circle(surf, Config.CIRCLES_COLOR, (int(x), int(y)),
                            max(int(radius), 1), 1)
 
 
-def targetFunction(t: float) -> complex:
-    return functionFromPath(readPathFromFile((path_file)), t)
+def count_files(directory):
+    num_files = 0
+    for root, dirs, files in os.walk(directory):
+        num_files += len(files)
+    return num_files
 
 
 def main():
+    multiple_paths = os.path.isdir(Config.PATH)
     print("computing parameters ...")
     time_start = time()
-    parameters = transformer.transform(targetFunction, Constants.ORDER,
-                                       Constants.INTEGRATE_PRECISION)
+    if not multiple_paths:
+        target_path = readPathFromFile(Config.PATH)
+        parameters_list = [
+            transformer.transform(target_path, Config.ORDER,
+                                  Config.INTEGRATE_PRECISION)
+        ]
+    else:
+        parameters_list = []
+        num_of_paths = count_files(Config.PATH)
+        for path_index in range(num_of_paths):
+            file_path = Config.PATH + "/" + os.path.basename(
+                Config.PATH) + str(path_index)
+            target_path = readPathFromFile(file_path)
+            print(file_path)
+            parameters_list.append(
+                transformer.transform(target_path, Config.ORDER,
+                                      Config.INTEGRATE_PRECISION))
     time_cost = time() - time_start
     print("parameters got, time cost: {:.2f}s".format(time_cost))
     print("starting gui ...")
 
     pygame.init()
     screen = pygame.display.set_mode(
-        (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
+        (Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT))
     pygame.display.set_caption("Fourier Graph")
     clock = pygame.time.Clock()
     t = 0.0
-    track = pygame.surface.Surface(
-        (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
-    track.fill(Constants.BACKGROUND_COLOR)
-    track.set_colorkey(Constants.BACKGROUND_COLOR)
+    track = pygame.surface.Surface((Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT))
+    track.fill(Config.BACKGROUND_COLOR)
+    track.set_colorkey(Config.BACKGROUND_COLOR)
     lastpoint = None
+
+    graph_index = 0
 
     while True:
         for event in pygame.event.get():
@@ -78,27 +98,32 @@ def main():
                 pygame.quit()
                 quit()
 
-        screen.fill(Constants.BACKGROUND_COLOR)
-        t += Constants.DELTA_T
+        screen.fill(Config.BACKGROUND_COLOR)
+        t += Config.DELTA_T
         if t >= 1.0:
+            graph_index += 1
+            lastpoint = None
+            if graph_index >= len(parameters_list):
+                graph_index = 0
             t = 0.0
         # draw origin
-        pygame.draw.circle(screen, Constants.ORIGIN_COLOR,
-                           Constants.ORIGIN_POSITION, 1)
+        pygame.draw.circle(screen, Config.ORIGIN_COLOR, Config.ORIGIN_POSITION,
+                           1)
         # draw x y axis
         pygame.draw.line(
             screen,
-            Constants.X_AXIS_COLOR,
-            (0, Constants.ORIGIN_POSITION[1]),
-            (Constants.WINDOW_WIDTH, Constants.ORIGIN_POSITION[1]),
+            Config.X_AXIS_COLOR,
+            (0, Config.ORIGIN_POSITION[1]),
+            (Config.WINDOW_WIDTH, Config.ORIGIN_POSITION[1]),
         )
         pygame.draw.line(
             screen,
-            Constants.Y_AXIS_COLOR,
-            (Constants.ORIGIN_POSITION[0], 0),
-            (Constants.ORIGIN_POSITION[0], Constants.WINDOW_HEIGHT),
+            Config.Y_AXIS_COLOR,
+            (Config.ORIGIN_POSITION[0], 0),
+            (Config.ORIGIN_POSITION[0], Config.WINDOW_HEIGHT),
         )
-        circles = transformer.getCircles(parameters, t)
+
+        circles = transformer.getCircles(parameters_list[graph_index], t)
         point = circles[-1]["pos"]
         drawComplexCircle(circles, screen)
         if lastpoint:
@@ -106,7 +131,7 @@ def main():
         lastpoint = point
         screen.blit(track, (0, 0))
         pygame.display.flip()
-        clock.tick(Constants.FPS)
+        clock.tick(Config.FPS)
 
 
 main()

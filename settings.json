@@ -1,6 +1,6 @@
 {
-    "path_file": "./data/square",
-    "integrate_precision": 600,
+    "path": "./data/square",
+    "integrate_precision": 2048,
     "circles_color": [
         255,
         255,
@@ -36,7 +36,7 @@
         700
     ],
     "graph_scale": 250.0,
-    "order": 100,
+    "order": 300,
     "delta_t": 0.001,
     "fps": 60
 }

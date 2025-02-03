@@ -6,8 +6,8 @@ jsonFile.close()
 settings = json.loads(jsonStr)
 
 
-class Constants:
-    PATH_FILE = settings["path_file"]
+class Config:
+    PATH = settings["path"]
     INTEGRATE_PRECISION = settings["integrate_precision"]
     CIRCLES_COLOR = settings["circles_color"]
     TRACK_COLOR = settings["track_color"]

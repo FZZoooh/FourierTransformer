@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from path_to_function import functionFromPath
 
 
 # basic maths
@@ -35,7 +36,7 @@ def transform_old(target, order: int, precision) -> dict:
     return factors
 
 
-def transform(target, order: int, precision: int) -> dict:
+def transform_old(target, order: int, precision: int) -> dict:
     factors = {"order": order}
     mi, ma = 0.0, 1.0
     deltax = (ma - mi) / precision
@@ -43,6 +44,24 @@ def transform(target, order: int, precision: int) -> dict:
                            endpoint=False) + deltax / 2  # Midpoint sampling
     target_values = target(t_values)  # target now handles array input
 
+    n_values = np.arange(-order, order + 1)
+    exponents = -np.outer(n_values, t_values)
+    exp_terms = exp2piI(exponents)
+
+    integrals = np.sum(target_values * exp_terms, axis=1) * deltax
+    for n, val in zip(n_values, integrals):
+        factors[n] = val
+    return factors
+
+
+def transform(target_path, order: int, precision: int) -> dict:
+    factors = {"order": order}
+    mi, ma = 0.0, 1.0
+    deltax = (ma - mi) / precision
+    t_values = np.linspace(mi, ma, precision,
+                           endpoint=False) + deltax / 2  # Midpoint sampling
+    target_values = functionFromPath(
+        target_path, t_values)  # target now handles array input
     n_values = np.arange(-order, order + 1)
     exponents = -np.outer(n_values, t_values)
     exp_terms = exp2piI(exponents)

@@ -4,7 +4,7 @@ from tkinter import filedialog
 
 def pixel_to_logical(x_pixel, y_pixel):
     x = (x_pixel - 300) / 300
-    y = (300 - y_pixel) / 300
+    y = (y_pixel - 300) / 300
     return (x, y)
 
 
@@ -26,7 +26,6 @@ def draw(event):
 
 
 def end_draw(event):
-    """鼠标释放事件处理"""
     global drawing
     drawing = False
 
