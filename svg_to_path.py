@@ -2,6 +2,7 @@ import svgpathtools
 import numpy as np
 import argparse
 import os
+from tqdm import tqdm
 
 
 def readPathFromFile(fileName: str, pathIndex=0) -> list:
@@ -63,7 +64,7 @@ if __name__ == "__main__":
         for i in range(num):
             pathlist.append(readPathFromFile(filename, i))
         print("total {} path files".format(num))
-        for i in range(num):
+        for i in tqdm(range(num)):
             s = convertSvgToPath(filename,
                                  pathIndex=i,
                                  offset=getOffsetOfPaths(pathlist))

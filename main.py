@@ -5,6 +5,7 @@ import os
 from path_to_function import *
 from config import Config
 from time import time
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--path-file', type=str)
@@ -58,23 +59,22 @@ def main():
     multiple_paths = os.path.isdir(Config.PATH)
     print("computing parameters ...")
     time_start = time()
-    if not multiple_paths:
+    if multiple_paths:
+        parameters_list = []
+        num_of_paths = count_files(Config.PATH)
+        for path_index in tqdm(range(num_of_paths)):
+            file_path = Config.PATH + "/" + os.path.basename(
+                Config.PATH) + str(path_index)
+            target_path = readPathFromFile(file_path)
+            parameters_list.append(
+                transformer.transform(target_path, Config.ORDER,
+                                      Config.INTEGRATE_PRECISION))
+    else:
         target_path = readPathFromFile(Config.PATH)
         parameters_list = [
             transformer.transform(target_path, Config.ORDER,
                                   Config.INTEGRATE_PRECISION)
         ]
-    else:
-        parameters_list = []
-        num_of_paths = count_files(Config.PATH)
-        for path_index in range(num_of_paths):
-            file_path = Config.PATH + "/" + os.path.basename(
-                Config.PATH) + str(path_index)
-            target_path = readPathFromFile(file_path)
-            print(file_path)
-            parameters_list.append(
-                transformer.transform(target_path, Config.ORDER,
-                                      Config.INTEGRATE_PRECISION))
     time_cost = time() - time_start
     print("parameters got, time cost: {:.2f}s".format(time_cost))
     print("starting gui ...")
