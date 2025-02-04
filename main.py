@@ -10,6 +10,7 @@ from tqdm import tqdm
 parser = argparse.ArgumentParser()
 parser.add_argument('--path-file', type=str)
 parser.add_argument('--graph-scale', type=int)
+parser.add_argument('--adaptive-scale', action='store_true')
 args = parser.parse_args()
 
 if args.path_file:
@@ -61,13 +62,14 @@ def main():
     time_start = time()
     if multiple_paths:
         parameters_list = []
-        try:
-            speedconfig = open(Config.PATH +
-                               "/speed.config").read().splitlines()
-        except FileNotFoundError:
-            print("speed.config not found, using default speed 1.0")
-            speedconfig = [1.0] * num_of_paths
-        num_of_paths = count_files(Config.PATH) - 1  # exclude speed.config
+        speedconfig = open(Config.PATH + "/speed.config").read().splitlines()
+        sizeconfig = open(Config.PATH + "/size.config").read().split()
+        if args.adaptive_scale:
+            Config.GRAPH_SCALE = min(
+                Config.WINDOW_WIDTH / float(sizeconfig[0]),
+                Config.WINDOW_HEIGHT / float(sizeconfig[1]))
+        num_of_paths = count_files(
+            Config.PATH) - 2  # exclude speed.config and size.config
         for i in range(num_of_paths):
             speedconfig[i] = float(speedconfig[i])
         for path_index in tqdm(range(num_of_paths)):

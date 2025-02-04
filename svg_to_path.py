@@ -49,6 +49,20 @@ def getOffsetOfPaths(pathlist: list) -> tuple:
     return (-(global_xmin + global_xmax) / 2, -(global_ymin + global_ymax) / 2)
 
 
+def getSizeOfPaths(pathlist: list) -> tuple:
+    global_xmin, global_xmax, global_ymin, global_ymax = float('inf'), float(
+        '-inf'), float('inf'), float('-inf')
+    for path in pathlist:
+        bbox = path.bbox()
+        if bbox is not None:  # 确保路径有效
+            xmin, xmax, ymin, ymax = bbox
+            global_xmin = min(global_xmin, xmin)
+            global_xmax = max(global_xmax, xmax)
+            global_ymin = min(global_ymin, ymin)
+            global_ymax = max(global_ymax, ymax)
+    return (global_xmax - global_xmin, global_ymax - global_ymin)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--file-name', type=str)
@@ -76,6 +90,10 @@ if __name__ == "__main__":
         speedconfig = open(directory + "/speed.config", "w")
         for i in range(num):
             speedconfig.write(str(max(average / lengthlist[i], 1)) + "\n")
+        sizeconfig = open(directory + "/size.config", "w")
+        sizeconfig.write(
+            str(getSizeOfPaths(pathlist)[0]) + " " +
+            str(getSizeOfPaths(pathlist)[1]))
     else:
         s = convertSvgToPath(filename, pathIndex=index)
         with open(filename.replace(".svg", str(index)), "w") as f:
