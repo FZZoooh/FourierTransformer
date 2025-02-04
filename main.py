@@ -61,7 +61,15 @@ def main():
     time_start = time()
     if multiple_paths:
         parameters_list = []
-        num_of_paths = count_files(Config.PATH)
+        try:
+            speedconfig = open(Config.PATH +
+                               "/speed.config").read().splitlines()
+        except FileNotFoundError:
+            print("speed.config not found, using default speed 1.0")
+            speedconfig = [1.0] * num_of_paths
+        num_of_paths = count_files(Config.PATH) - 1  # exclude speed.config
+        for i in range(num_of_paths):
+            speedconfig[i] = float(speedconfig[i])
         for path_index in tqdm(range(num_of_paths)):
             file_path = Config.PATH + "/" + os.path.basename(
                 Config.PATH) + str(path_index)
@@ -69,6 +77,7 @@ def main():
             parameters_list.append(
                 transformer.transform(target_path, Config.ORDER,
                                       Config.INTEGRATE_PRECISION))
+
     else:
         target_path = readPathFromFile(Config.PATH)
         parameters_list = [
@@ -99,7 +108,7 @@ def main():
                 quit()
 
         screen.fill(Config.BACKGROUND_COLOR)
-        t += Config.DELTA_T
+        t += Config.DELTA_T * speedconfig[graph_index]
         if t >= 1.0:
             graph_index += 1
             lastpoint = None

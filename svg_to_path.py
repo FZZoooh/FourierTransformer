@@ -13,7 +13,7 @@ def readPathFromFile(fileName: str, pathIndex=0) -> list:
 def convertSvgToPath(fileName: str,
                      pathIndex=0,
                      offset=(0, 0),
-                     delta=1) -> None:
+                     delta=1) -> tuple:
     path = readPathFromFile(fileName, pathIndex)
     total_length = path.length()
     samples = []
@@ -27,7 +27,7 @@ def convertSvgToPath(fileName: str,
     for _, (x, y) in enumerate(samples):
         output_string += f"{x + offset[0]} {y + offset[1]}"
         output_string += "\n"
-    return output_string
+    return (output_string, total_length)
 
 
 def getNumOfPaths(fileName: str) -> int:
@@ -64,12 +64,18 @@ if __name__ == "__main__":
         for i in range(num):
             pathlist.append(readPathFromFile(filename, i))
         print("total {} path files".format(num))
+        lengthlist = []
         for i in tqdm(range(num)):
-            s = convertSvgToPath(filename,
-                                 pathIndex=i,
-                                 offset=getOffsetOfPaths(pathlist))
+            s, length = convertSvgToPath(filename,
+                                         pathIndex=i,
+                                         offset=getOffsetOfPaths(pathlist))
+            lengthlist.append(length)
             with open(directory + "/" + shortname + str(i), "w") as f:
                 f.write(s)
+        average = sum(lengthlist) / len(lengthlist)
+        speedconfig = open(directory + "/speed.config", "w")
+        for i in range(num):
+            speedconfig.write(str(max(average / lengthlist[i], 1)) + "\n")
     else:
         s = convertSvgToPath(filename, pathIndex=index)
         with open(filename.replace(".svg", str(index)), "w") as f:
