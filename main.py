@@ -11,12 +11,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--path-file', type=str)
 parser.add_argument('--graph-scale', type=float)
 parser.add_argument('--adaptive-scale', action='store_true')
+parser.add_argument('--speed', type=float)
+parser.add_argument('--repeat', action='store_true')
 args = parser.parse_args()
 
 if args.path_file:
     Config.PATH = args.path_file
 if args.graph_scale:
     Config.GRAPH_SCALE = args.graph_scale
+if args.speed:
+    Config.DELTA_T *= args.speed
 
 
 def drawComplexPoint(num: complex, surf: pygame.surface.Surface) -> None:
@@ -115,7 +119,14 @@ def main():
             graph_index += 1
             lastpoint = None
             if graph_index >= len(parameters_list):
-                graph_index = 0
+                if args.repeat:
+                    graph_index = 0
+                else:
+                    while True:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                pygame.quit()
+                                quit()
             t = 0.0
         # draw origin
         pygame.draw.circle(screen, Config.ORIGIN_COLOR, Config.ORIGIN_POSITION,
