@@ -13,6 +13,8 @@ Create a path and draw it using awesome Fourier series.
 2. Run `python create_path.py`. This will start a gui, and you can draw your path there.
    After that, click the save button to save it into `path/to/your/file`.
 3. Run `python main.py --path-file "path/to/your/file"`.
+4. add argument `--graph-scale <float>` to scale the graph. default 1.0.
+5. add argument `--adaptive-scale` to make the graph automatically fill the window.
 
 ## Generate path from svg file
 1. Get into the project directory.

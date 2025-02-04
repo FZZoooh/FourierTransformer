@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--path-file', type=str)
-parser.add_argument('--graph-scale', type=int)
+parser.add_argument('--graph-scale', type=float)
 parser.add_argument('--adaptive-scale', action='store_true')
 args = parser.parse_args()
 
