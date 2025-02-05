@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import os
 from tqdm import tqdm
+import shutil
 
 
 def readPathFromFile(fileName: str, pathIndex=0) -> list:
@@ -71,6 +72,14 @@ if __name__ == "__main__":
     index = parser.parse_args().path_index
     if index is None:
         directory = filename.replace(".svg", "")
+        if os.path.exists(directory):
+            choice = input(
+                "target directory already exists. remove it? [Y/n]: ")
+            if choice == "Y" or choice == "y":
+                shutil.rmtree(directory)
+            else:
+                print("operation aborted")
+                quit()
         os.mkdir(directory)
         shortname = os.path.basename(directory)
         num = getNumOfPaths(filename)
@@ -95,6 +104,14 @@ if __name__ == "__main__":
             str(getSizeOfPaths(pathlist)[0]) + " " +
             str(getSizeOfPaths(pathlist)[1]))
     else:
+        targetfile = filename.replace(".svg", str(index))
+        if os.path.exists(targetfile):
+            choice = input("target file already exists. remove it? [Y/n]: ")
+            if choice == "Y" or choice == "y":
+                os.remove(targetfile)
+            else:
+                print("operation aborted")
+                quit()
         s = convertSvgToPath(filename, pathIndex=index)
-        with open(filename.replace(".svg", str(index)), "w") as f:
+        with open(targetfile, "w") as f:
             f.write(s)

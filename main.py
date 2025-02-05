@@ -122,11 +122,15 @@ def main():
                 if args.repeat:
                     graph_index = 0
                 else:
+                    screen.fill(Config.BACKGROUND_COLOR)
+                    screen.blit(track, (0, 0))
+                    pygame.display.flip()
                     while True:
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 pygame.quit()
                                 quit()
+                        clock.tick(Config.FPS)
             t = 0.0
         # draw origin
         pygame.draw.circle(screen, Config.ORIGIN_COLOR, Config.ORIGIN_POSITION,
