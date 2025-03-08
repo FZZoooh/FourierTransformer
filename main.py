@@ -114,7 +114,10 @@ def main():
                 quit()
 
         screen.fill(Config.BACKGROUND_COLOR)
-        t += Config.DELTA_T * speedconfig[graph_index]
+        if multiple_paths:
+            t += Config.DELTA_T * speedconfig[graph_index]
+        else:
+            t += Config.DELTA_T
         if t >= 1.0:
             graph_index += 1
             lastpoint = None
